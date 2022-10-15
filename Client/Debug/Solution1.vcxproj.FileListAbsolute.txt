@@ -1,1 +1,3 @@
 C:\Users\27161\Desktop\2022秋 大三上\软件工程探索与实践\项目\Solution1\Debug\Solution1.exe
+C:\Users\27161\Desktop\MASM_hw\Server\Debug\Solution1.exe
+C:\Users\27161\Desktop\MASM_hw\Client\Debug\Solution1.exe
