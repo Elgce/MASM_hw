@@ -12,9 +12,6 @@ include		wsock32.inc
 includelib	wsock32.lib
 includelib      msvcrt.lib
 printf          PROTO C :ptr sbyte, :VARARG
-;include		_SocketRoute.asm
-;include		_MsgQueue.asm
-;include		Message.inc
 ICO_MAIN	equ	1000
 DLG_MAIN	equ	2000
 IDC_COUNT	equ	2001
@@ -73,11 +70,7 @@ _WaitData	proc	_hSocket,_dwTime
 		ret
 
 _WaitData	endp
-;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-; 接收规定字节的数据，如果缓冲区中的数据不够则等待
-; 返回：eax = TRUE，连接中断或发生错误
-;	eax = FALSE，成功
-;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+;接受数据
 _RecvData	proc	_hSocket,_lpData,_dwSize
 		local	@dwStartTime
 
@@ -85,13 +78,11 @@ _RecvData	proc	_hSocket,_lpData,_dwSize
 		mov	ebx,_dwSize
 		invoke	GetTickCount
 		mov	@dwStartTime,eax
-;********************************************************************
 		@@:
 		invoke	GetTickCount			;查看是否超时
 		sub	eax,@dwStartTime
 		cmp	eax,10 * 1000
 		jge	_Err
-;********************************************************************
 		invoke	_WaitData,_hSocket,100*1000	;等待数据100ms
 		cmp	eax,SOCKET_ERROR
 		jz	_Err
@@ -113,10 +104,7 @@ _Err:
 		ret
 
 _RecvData	endp
-;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 ; 接收一个符合规范的数据包
-; 返回：eax = TRUE （失败）
-;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 _RecvPacket	proc	_hSocket,_lpBuffer,_dwSize
 		local	@dwReturn
 
@@ -124,9 +112,6 @@ _RecvPacket	proc	_hSocket,_lpBuffer,_dwSize
 		mov	@dwReturn,TRUE
 		mov	esi,_lpBuffer
 		assume	esi:ptr MSG_STRUCT
-;********************************************************************
-; 接收数据包头部并检测数据是否正常
-;********************************************************************
 		invoke	_RecvData,_hSocket,esi,sizeof MSG_HEAD
 		or	eax,eax
 		jnz	_Ret
@@ -135,9 +120,6 @@ _RecvPacket	proc	_hSocket,_lpBuffer,_dwSize
 		jb	_Ret
 		cmp	ecx,_dwSize
 		ja	_Ret
-;********************************************************************
-; 接收余下的数据
-;********************************************************************
 		sub	ecx,sizeof MSG_HEAD
 		add	esi,sizeof MSG_HEAD
 		.if	ecx
@@ -153,7 +135,6 @@ _Ret:
 		ret
 
 _RecvPacket	endp
-;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 
 
 ; 通讯服务线程：每个客户端登录的连接将产生一个线程
