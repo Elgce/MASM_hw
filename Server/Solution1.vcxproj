@@ -22,6 +22,7 @@
     <MASM Include="WinApp_v2.asm" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Message.inc" />
     <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
